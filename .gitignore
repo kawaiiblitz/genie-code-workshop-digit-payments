@@ -8,3 +8,6 @@ venv/
 *.parquet
 *.delta
 .databricks/
+
+# Script personal del presentador — no compartir en el repo público
+docs/workshop_guion.md

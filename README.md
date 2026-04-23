@@ -5,8 +5,6 @@ un equipo de ingeniería que hoy construye su capa Silver a mano desde archivos
 CDC (estilo AWS DMS) y consume directo de Silver para dashboards de fraude,
 lo que le pega al performance.
 
-Cliente destino: **OpenPay** (alias en la demo: **`digit_payments`**).
-
 ---
 
 ## La historia que cuenta esta demo
@@ -80,28 +78,26 @@ Metric Views + Genie Space + Row Filter por país
 ## Estructura del repo
 
 ```
-openpay-workshop/
+genie-code-workshop-digit-payments/
 │
 ├── README.md                          (este archivo)
 ├── docs/
-│   ├── arquitectura.md                Diagrama + explicación larga
-│   ├── genie_code_prompts.md          ★ Los ~7 prompts para copiar/pegar en vivo
-│   └── workshop_guion.md              Guion minuto a minuto para Raquel
+│   ├── arquitectura.md                Diagrama + explicación de la arquitectura
+│   └── genie_code_prompts.md          ★ Los 6 prompts para ejecutar en Genie Code
 │
-├── notebooks/
-│   ├── 00_setup/
-│   │   └── 00_setup.py                Crea catalog + esquemas + volumen UC
-│   │
-│   └── 01_data_generation/            Scaffold: genera la zona landing
-│       ├── 01_gen_merchants.py        Full load + 30 días de CDC
-│       ├── 02_gen_bins.py
-│       ├── 03_gen_customers.py
-│       ├── 04_gen_transactions.py     ~5M registros, append-only
-│       ├── 05_gen_fraud_signals.py
-│       └── 99_run_all.py              Orquestador
-│
-└── scripts/
-    └── deploy_to_workspace.sh         (Opcional) Sube al workspace
+└── notebooks/
+    ├── config.py                      Variables centrales (CATALOG, SCHEMA, VOLUME)
+    │
+    ├── 00_setup/
+    │   └── 00_setup.py                Crea catalog + esquema + volumen UC
+    │
+    └── 01_data_generation/            Scaffold: genera la zona landing
+        ├── 01_gen_merchants.py        Full load + 30 días de CDC
+        ├── 02_gen_bins.py
+        ├── 03_gen_customers.py
+        ├── 04_gen_transactions.py     ~5M registros, append-only
+        ├── 05_gen_fraud_signals.py
+        └── 99_run_all.py              Orquestador
 ```
 
 **Todo lo que está en `bronze/`, `silver/` y `gold/` se construye en vivo con
@@ -118,20 +114,20 @@ Genie Code durante la demo** — por diseño.
 - Python 3.10+
 - Permisos para crear catálogo + volumen UC en el workspace
 
-### ★ Paso 0 — Ajustar catálogo y esquema *(todos lo hacen primero)*
+### ★ Paso 0 — Ajustar catálogo y esquema *(hazlo primero)*
 
-**Antes de correr cualquier cosa**, abrí `notebooks/config.py` y revisá:
+**Antes de correr cualquier cosa**, abre `notebooks/config.py` y revisa:
 
 ```python
-CATALOG = "digit_payments"    # ← cambiá si ya tenés un catálogo sandbox propio
+CATALOG = "digit_payments"    # ← cambia si ya tienes un catálogo sandbox propio
 RAW_SCHEMA = "raw"
 VOLUME_NAME = "landing"
 ```
 
 Por default crea el catálogo `digit_payments` (si no existe) con el esquema
-`raw` y el volumen `landing`. Si en tu workspace no podés crear catálogos, o
-preferís reutilizar uno existente, cambia estas 3 variables. El resto de los
-notebooks lo levantan automáticamente vía `%run ../config`.
+`raw` y el volumen `landing`. Si en tu workspace no puedes crear catálogos, o
+prefieres reutilizar uno existente, cambia estas 3 variables. El resto de los
+notebooks las levantan automáticamente vía `%run ../config`.
 
 ### Paso 1 — Preparar el scaffold en el workspace
 
@@ -141,14 +137,8 @@ notebooks lo levantan automáticamente vía `%run ../config`.
 
 ### Paso 2 — Ejecutar el workshop
 
-Abrir Genie Code en el workspace y seguir
+Abre Genie Code en el workspace y sigue
 [`docs/genie_code_prompts.md`](docs/genie_code_prompts.md) en orden.
-
-### Paso 3 — Guion para quien presenta
-
-Revisar [`docs/workshop_guion.md`](docs/workshop_guion.md) antes de arrancar.
-Contiene el minuto a minuto + los **2 momentos hands-on** donde la audiencia
-prueba Genie Code sobre sus propios datos reales.
 
 ---
 
@@ -156,7 +146,7 @@ prueba Genie Code sobre sus propios datos reales.
 
 | Enfoque típico | Esta demo |
 |---|---|
-| Tablas raw estáticas | **CDC incremental estilo AWS DMS** (refleja el flujo real del cliente) |
-| "Ver todas las features de Genie Code" | **Resolver el dolor específico del cliente**: cerrar Silver |
+| Tablas raw estáticas | **CDC incremental estilo AWS DMS** (refleja el flujo real de DMS) |
+| "Ver todas las features de Genie Code" | **Resolver un dolor específico**: cerrar Silver |
 | Hands-on que se cae si el wifi falla | **Demo guiada**: el presentador controla el ritmo |
 | Silver aspiracional, Gold como estrella | **Silver es el protagonista**, Gold es el cierre |

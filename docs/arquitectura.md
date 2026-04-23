@@ -1,6 +1,6 @@
 # Arquitectura de la demo
 
-## El flujo real del cliente (OpenPay, hoy)
+## Flujo típico de un procesador de pagos con CDC
 
 ```
 ┌──────────────────┐    AWS DMS    ┌──────────────┐
@@ -24,13 +24,12 @@
                          └───────────────────────────┘
 ```
 
-**Pain point real** (notas del 9-abr y 31-mar-2026):
+**Pain points que ataca esta arquitectura:**
 - DMS ya entrega incrementales enmascarados a S3 landing
-- El equipo está completando Silver *a mano*, tabla por tabla
-- Consumen Silver directo para tableros de fraude → performance pésimo
-- Deadline interno: cerrar Silver a finales de mayo 2026
+- El equipo completa Silver *a mano*, tabla por tabla
+- Dashboards consumen Silver directamente → performance pésimo
 
-## Lo que la demo espejera (digit_payments)
+## Lo que la demo espejea (digit_payments)
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -93,42 +92,6 @@
 
 Total raw: ~5.6M registros. Generación local: <5 min en cluster Serverless.
 
-## Cómo encaja esto en su arquitectura (3 workspaces + DAB)
-
-El cliente opera con 3 workspaces y deploy vía Databricks Asset Bundles:
-
-```
-┌─ Dev/Pre-prod account ────────┐    ┌─ Production account ─────────────────┐
-│                               │    │                                      │
-│  Workspace Dev                │    │  Workspace Prod                      │
-│  • devs codean                │PR→ │  • jobs continuos + batch            │
-│  • DAB empaqueta              │    │  • service principal ejecuta         │
-│  • push a ft/ branch          │    │                                      │
-│                               │    │  Workspace Sandbox                   │
-│  [ESTA DEMO VIVE ACÁ]         │    │  • negocio consume                   │
-│                               │    │  • Databricks One + Discover-Domains │
-└───────────────────────────────┘    │  • Genie Spaces se publican acá      │
-                                     └──────────────────────────────────────┘
-```
-
-**Mapeo de la demo a su flujo real:**
-
-1. **Durante el workshop**, todo el pipeline (bronze → silver → gold) se
-   construye en **Workspace Dev** usando Genie Code.
-2. **Metric Views** quedan en Unity Catalog (compartido entre workspaces).
-3. **El Genie Space** del Prompt 5 se publica en **Workspace Sandbox** para
-   que Andrea, Enrique y el equipo de negocio lo consuman vía Databricks One.
-4. **DAB** empaqueta el pipeline para promoción Dev → Prod. Genie Code
-   puede generar el `databricks.yml` y el bundle config (ver apéndice de
-   prompts de bolsillo).
-5. **PR manual Dev → Main** sigue siendo el gate humano — Genie Code
-   genera el código, pero la revisión del equipo antes de Prod no
-   desaparece. Es una característica, no un bug.
-
-**Lo que NO toca la demo:**
-- Hive metastore legacy (en migración a UC — no es parte de este workshop)
-- Service principal de prod (Genie Code genera el código, no lo deploya)
-
 ## Decisiones de diseño
 
 ### Por qué SCD Type 2 y no SCD 1
@@ -141,11 +104,12 @@ correcta de responder eso sin joins imposibles.
 ### Por qué `APPLY CHANGES INTO` y no MERGE manual
 
 Lakeflow Declarative Pipelines maneja la complejidad de SCD2 con una
-sentencia declarativa. En la demo, Genie Code la escribe sola — sin que el
-equipo de OpenPay tenga que aprender la sintaxis. Ese es el "wow".
+sentencia declarativa. En la demo, Genie Code la escribe solo — sin que el
+equipo tenga que aprender la sintaxis. Ese es el "wow".
 
 ### Por qué Metric Views después de Gold
 
-Ya se les vendió en la sesión del 26-feb-2026. El workshop cierra el ciclo:
-Gold → Metric View → Genie Space. El equipo de BI ve que la capa semántica
-no es un PowerPoint, es algo que corre y Genie responde.
+Metric Views es la capa semántica en Unity Catalog. El workshop cierra el
+ciclo: Gold → Metric View → Genie Space. El equipo de BI ve que la capa
+semántica no es un PowerPoint, es algo que corre y responde preguntas en
+lenguaje natural.

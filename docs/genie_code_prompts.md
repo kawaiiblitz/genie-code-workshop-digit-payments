@@ -1,16 +1,15 @@
 # Prompts de Genie Code — `digit_payments`
 
-Estos son los **6 prompts** que Raquel copia/pega en Genie Code durante la
-demo, en orden. Cada uno asume que el anterior ya se ejecutó.
+Estos son los **6 prompts** para ejecutar en Genie Code durante la demo,
+en orden. Cada uno asume que el anterior ya se ejecutó.
 
-> **Tip para la demo:** abre Genie Code con el contexto del catálogo
-> `digit_payments` ya cargado. Antes de pegar cada prompt, lee en voz alta
-> **qué vas a pedirle** para que la audiencia sepa qué esperar ANTES de ver
-> el código que Genie Code va a escribir.
+> **Tip:** abre Genie Code con el catálogo `digit_payments` ya cargado como
+> contexto. Antes de pegar cada prompt, di en voz alta **qué le vas a
+> pedir** para que la audiencia sepa qué esperar antes de ver el código
+> que Genie Code va a escribir.
 
 > **Idioma:** Genie Code entiende español perfectamente. Los prompts están
-> en español para que la audiencia los lea contigo. Si prefieres inglés,
-> son intercambiables.
+> en español. Si prefieres inglés, son intercambiables.
 
 ---
 
@@ -83,9 +82,9 @@ Autoloader configurado.
 
 ## Prompt 2 — Silver dimensiones: SCD Type 2 con `APPLY CHANGES`
 
-> **Este es el momento estrella del workshop.** Aquí es donde el equipo de
-> OpenPay ve que Genie Code les resuelve en 2 minutos lo que les ha tomado
-> semanas.
+> **Este es el momento estrella del workshop.** Aquí es donde el equipo
+> ve que Genie Code resuelve en 2 minutos lo que a ellos les toma semanas
+> escribiendo MERGEs a mano.
 
 ```
 En el mismo pipeline, agrega el esquema silver con las 3 dimensiones como
@@ -126,7 +125,7 @@ ocurrió esta transacción, ¿este merchant estaba en qué tier?").
 **Punto de pausa en la demo:** cuando Genie Code termine, muestra el código
 generado y señala literalmente la línea de `APPLY CHANGES INTO ... STORED AS
 SCD TYPE 2`. Esa línea *reemplaza* ~50 líneas de MERGE manual con lógica de
-válido-desde / válido-hasta que OpenPay escribiría a mano.
+válido-desde / válido-hasta.
 
 ---
 
@@ -164,9 +163,9 @@ Agrega tags de Unity Catalog a las tablas silver:
 Agrega COMMENT a cada columna importante de silver.transactions.
 ```
 
-**Punto de pausa:** mostrá que Genie Code agregó:
+**Punto de pausa:** muestra que Genie Code agregó:
 - El streaming-static join (patrón no trivial)
-- Las tags de UC (consistencia que OpenPay pidió)
+- Las tags de UC (consistencia de nomenclatura)
 - Comments a nivel columna (sin que lo pidieras explícitamente — Genie Code
   aprende el estándar del contexto)
 
@@ -174,8 +173,8 @@ Agrega COMMENT a cada columna importante de silver.transactions.
 
 ## Prompt 4 — Gold: reemplazar window functions por agregados incrementales
 
-> **Este prompt ataca el pain del 9-abr directamente: window functions
-> sobre Silver que revientan el performance.**
+> **Este prompt ataca el pain principal: window functions sobre Silver
+> que revientan el performance.**
 
 ```
 Crea el esquema gold y dos tablas materialized view en el pipeline:
@@ -209,8 +208,8 @@ dashboards consultan Gold directamente.
 
 **Punto de pausa crítico:** abre un notebook lateral rápido y corre un
 `SELECT * FROM gold.merchant_daily_risk ORDER BY fraud_rate DESC LIMIT 20`.
-Tiempo de respuesta: sub-segundo. Compara verbalmente con los 15-20 min de
-sus dashboards actuales.
+Tiempo de respuesta: sub-segundo. Compara verbalmente contra una query
+equivalente con window function sobre Silver.
 
 ---
 
@@ -249,9 +248,9 @@ Agrega 3 preguntas ejemplo en el Genie Space:
 ```
 
 **Punto de pausa — DEMO EN VIVO:** abre el Genie Space generado y hazle
-tú una pregunta en lenguaje natural que NO esté en los ejemplos. Por ejemplo:
+una pregunta en lenguaje natural que NO esté en los ejemplos. Por ejemplo:
 *"¿Hubo picos de fraude nocturno en merchants tier C el fin de semana?"*
-Que la audiencia vea que Genie responde con SQL + gráfica.
+Que la audiencia vea cómo Genie responde con SQL + gráfica.
 
 ---
 
@@ -274,8 +273,8 @@ Agrega también column masking sobre silver.transactions.device_fingerprint:
 
 **Cierre de la demo:** señala que este gobierno se escribió en ~30 segundos
 con Genie Code, vs. horas de documentación y testing manual. Y que todo
-quedó en el pipeline declarativo — reproducible, versionable en Git,
-idéntico en dev/prod.
+queda en el pipeline declarativo — reproducible, versionable en Git,
+idéntico en dev y prod.
 
 ---
 
