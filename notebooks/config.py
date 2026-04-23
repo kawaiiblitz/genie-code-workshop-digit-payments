@@ -17,7 +17,7 @@
 # │ ★ AJUSTÁ ESTAS VARIABLES ANTES DE CORRER CUALQUIER NOTEBOOK ★  │
 # └────────────────────────────────────────────────────────────────┘
 
-CATALOG = "digit_payments"       # ← cambiá si querés usar otro catálogo
+CATALOG = "digit_payments"       # ← cambia si quieres usar otro catálogo
 RAW_SCHEMA = "raw"               # ← esquema para el landing
 VOLUME_NAME = "landing"          # ← volumen UC dentro de raw
 

@@ -17,6 +17,10 @@ en orden. Cada uno asume que el anterior ya se ejecutó.
 
 Antes del primer prompt, pega este **contexto inicial** para orientar al agente:
 
+> Este paso define a qué se está enfrentando Genie Code. Los archivos de
+> landing, el esquema del CDC, los nombres de las tablas. Con esto, el
+> agente no tiene que adivinar nada del dominio.
+
 ```
 Estoy construyendo una plataforma de datos para un procesador de pagos
 (alias: digit_payments). Tengo archivos CDC estilo AWS DMS en
@@ -43,6 +47,50 @@ Vamos a construir un medallón: bronze → silver → gold, usando Lakeflow
 Declarative Pipelines. Todo bajo el catálogo `digit_payments`, en esquemas
 `bronze`, `silver`, `gold` que crearemos sobre la marcha.
 ```
+
+---
+
+## Prompt maestro de estándares (opcional, recomendado)
+
+Inmediatamente después del contexto, pega este prompt. Son las "reglas del
+juego" que Genie Code va a respetar durante **toda** la sesión — así no
+tienes que repetir los estándares en cada prompt.
+
+```
+Antes de empezar, sigue estas reglas en TODO lo que generes:
+
+NAMING
+- snake_case en todos los identificadores
+- prefijos: dim_ para dimensiones, fact_ para hechos, stg_ para staging
+- nombres de columnas descriptivos (evitar abreviaciones obscuras)
+
+GOBIERNO (Unity Catalog)
+- Toda tabla con COMMENT descriptivo (qué contiene, quién la produce)
+- Columnas sensibles con COMMENT indicando sensibilidad
+- Tags UC obligatorios por tabla: 'layer', 'domain', 'pii_level'
+
+PERFORMANCE
+- Liquid clustering sobre las claves de join más frecuentes
+- Predictive Optimization ENABLE en esquemas gold
+- Z-order en tablas que no usan liquid clustering
+
+CALIDAD DE DATOS
+- Expectations con nivel apropiado: warn para monitoreo, drop para datos
+  inválidos que no deben propagarse
+- Comments en cada expectativa explicando su propósito
+
+STREAMING
+- Watermark de 10 min en streams
+- Deduplicación con dropDuplicatesWithinWatermark cuando aplique
+- Triggers fijos (processingTime='1 minute') para control de costo
+
+Respeta estas reglas sin que te las repita en cada prompt.
+```
+
+**Efecto durante la demo:** cuando los devs vean que el Prompt 2, 3, 4 y
+5 generan tablas con el mismo naming, tags y clustering sin que se lo
+pidas cada vez — ese es el momento donde entienden que el agente aprende
+el estándar del equipo, no solo genera código genérico.
 
 ---
 

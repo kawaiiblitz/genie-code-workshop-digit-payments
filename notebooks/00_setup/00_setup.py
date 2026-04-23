@@ -17,11 +17,18 @@
 
 # COMMAND ----------
 
-spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
+# Verificar que el catálogo existe (sin intentar crearlo — evita requerir permiso sobre la metastore)
+catalogs = [r.catalog for r in spark.sql("SHOW CATALOGS").collect()]
+if CATALOG not in catalogs:
+    raise RuntimeError(
+        f"El catálogo '{CATALOG}' no existe en este workspace. "
+        f"Crealo primero desde la UI o ajustá CATALOG en config.py a uno existente."
+    )
+
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{RAW_SCHEMA}")
 spark.sql(f"CREATE VOLUME IF NOT EXISTS {CATALOG}.{RAW_SCHEMA}.{VOLUME_NAME}")
 
-print(f"Catálogo y volumen listos en {LANDING_ROOT}/")
+print(f"Schema y volumen listos en {LANDING_ROOT}/")
 
 # COMMAND ----------
 
