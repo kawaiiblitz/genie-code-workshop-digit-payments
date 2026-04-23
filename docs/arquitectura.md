@@ -24,10 +24,15 @@
                          └───────────────────────────┘
 ```
 
-**Pain points que ataca esta arquitectura:**
-- DMS ya entrega incrementales enmascarados a S3 landing
-- El equipo completa Silver *a mano*, tabla por tabla
-- Dashboards consumen Silver directamente → performance pésimo
+**Qué tipo de escenario representa esta demo:**
+- DMS entrega incrementales enmascarados a S3 landing
+- El equipo escribe transformaciones para poblar Silver
+- Dashboards y modelos consumen de Silver (o de Gold, si la tienen)
+
+La demo **no propone una arquitectura correcta** — muestra cómo Genie Code
+puede acelerar cada capa de un escenario de medallón con CDC, que es un
+patrón común en procesadores de pagos. Si un equipo ya tiene su propia
+forma de estructurar esto, Genie Code se adapta a sus convenciones.
 
 ## Lo que la demo espejea (digit_payments)
 
@@ -92,24 +97,28 @@
 
 Total raw: ~5.6M registros. Generación local: <5 min en cluster Serverless.
 
-## Decisiones de diseño
+## Decisiones de la demo (no prescripciones arquitectónicas)
 
-### Por qué SCD Type 2 y no SCD 1
+### Por qué aparece SCD Type 2
 
-Los merchants y BINs tienen atributos que cambian y a fraude le importa el
-*snapshot histórico* al momento de la transacción (ej: "cuando se hizo esa
-transacción, ¿ese comercio estaba en tier A o B?"). SCD2 es la única forma
-correcta de responder eso sin joins imposibles.
+SCD Type 2 es útil cuando quieres reconstruir el estado histórico de una
+dimensión (ej: "cuando pasó esta transacción, ¿qué tier tenía este
+comercio?"). No es la única forma de manejar cambios — SCD1 (sobreescribir)
+es válido si no necesitas historia. La demo muestra SCD2 porque es un
+patrón que Genie Code escribe muy bien en pocas líneas; si un equipo
+prefiere SCD1, también lo genera.
 
-### Por qué `APPLY CHANGES INTO` y no MERGE manual
+### Por qué aparece `APPLY CHANGES INTO`
 
-Lakeflow Declarative Pipelines maneja la complejidad de SCD2 con una
-sentencia declarativa. En la demo, Genie Code la escribe solo — sin que el
-equipo tenga que aprender la sintaxis. Ese es el "wow".
+Es la sentencia declarativa de Lakeflow Declarative Pipelines para manejar
+SCD2 sin escribir MERGE a mano. Es poderosa como demo porque en ~8 líneas
+reemplaza lo que en MERGE toma 50. Pero si el equipo tiene MERGEs que
+funcionan, no hay razón de reemplazarlos mañana — Genie Code los escribe
+igual de rápido si se los pides.
 
-### Por qué Metric Views después de Gold
+### Por qué aparece Metric Views + Genie Space
 
-Metric Views es la capa semántica en Unity Catalog. El workshop cierra el
-ciclo: Gold → Metric View → Genie Space. El equipo de BI ve que la capa
-semántica no es un PowerPoint, es algo que corre y responde preguntas en
-lenguaje natural.
+Cerrar el ciclo end-to-end: desde el landing hasta una pregunta en
+lenguaje natural respondida por Genie. La capa semántica y el Genie
+Space son útiles si el equipo tiene analistas que preguntan mucho de lo
+mismo — pero no son obligatorios para usar el resto de lo que se mostró.
