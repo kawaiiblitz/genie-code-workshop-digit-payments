@@ -4,15 +4,15 @@
 
 ```
 ┌──────────────────┐    AWS DMS    ┌──────────────┐
-│ OLTP (Mongo /    │  ───────────► │   S3         │
+│ OLTP (           │  ───────────► │   S3         │
 │ ElasticSearch)   │   CDC I/U/D   │   landing/   │
-└──────────────────┘   incremental └──────┬───────┘
+└──────────────────┘               └──────┬───────┘
                                           │
                                           ▼
                                   ┌──────────────────┐
                                   │  Databricks      │
-                                  │  Silver          │◄── ★ bloqueo actual
-                                  │  (incompleta)    │
+                                  │  Silver          │
+                                  │                  │
                                   └──────┬───────────┘
                                          │
                                          ▼
@@ -24,15 +24,6 @@
                          └───────────────────────────┘
 ```
 
-**Qué tipo de escenario representa esta demo:**
-- DMS entrega incrementales enmascarados a S3 landing
-- El equipo escribe transformaciones para poblar Silver
-- Dashboards y modelos consumen de Silver (o de Gold, si la tienen)
-
-La demo **no propone una arquitectura correcta** — muestra cómo Genie Code
-puede acelerar cada capa de un escenario de medallón con CDC, que es un
-patrón común en procesadores de pagos. Si un equipo ya tiene su propia
-forma de estructurar esto, Genie Code se adapta a sus convenciones.
 
 ## Lo que la demo espejea (digit_payments)
 
@@ -85,7 +76,7 @@ forma de estructurar esto, Genie Code se adapta a sus convenciones.
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-## Volúmenes
+## DB Sintética
 
 | Entidad | Registros | Notas |
 |---|---|---|
@@ -93,7 +84,4 @@ forma de estructurar esto, Genie Code se adapta a sus convenciones.
 | bins | ~1,000 | Cambian poco, ~5 updates/día |
 | customers | ~100,000 | Full load + ~200 updates/día |
 | transactions | ~5,000,000 | 30 días, distribución no uniforme (picos nocturnos para fraude) |
-| fraud_signals | ~500,000 | Correlacionados con ~0.8% de transacciones |
-
-Total raw: ~5.6M registros. Generación local: <5 min en cluster Serverless.
-
+| fraud_signals | ~500,000 |  
