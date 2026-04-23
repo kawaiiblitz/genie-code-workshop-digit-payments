@@ -86,7 +86,7 @@ Genie Code durante la demo**.
 - Python 3.10+
 - Permisos para crear catálogo + volumen UC en el workspace
 
-### ★ Paso 0 — Ajustar catálogo y esquema *(hazlo primero)*
+### Paso 0 — Ajustar catálogo y esquema *(hazlo primero)*
 
 **Antes de correr cualquier cosa**, abre `notebooks/config.py` y revisa:
 
