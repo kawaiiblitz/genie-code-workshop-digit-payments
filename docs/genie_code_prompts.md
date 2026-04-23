@@ -2,15 +2,6 @@
 
 Estos son los **6 prompts** para ejecutar en Genie Code durante la demo,
 en orden. Cada uno asume que el anterior ya se ejecutó.
-
-> **Tip:** abre Genie Code con el catálogo `digit_payments` ya cargado como
-> contexto. Antes de pegar cada prompt, di en voz alta **qué le vas a
-> pedir** para que la audiencia sepa qué esperar antes de ver el código
-> que Genie Code va a escribir.
-
-> **Idioma:** Genie Code entiende español perfectamente. Los prompts están
-> en español. Si prefieres inglés, son intercambiables.
-
 ---
 
 ## Contexto para Genie Code
@@ -42,6 +33,11 @@ Estoy construyendo una plataforma de datos para un procesador de pagos
 
 Los archivos CDC tienen `Op` ∈ {I, U, D} y timestamp `ts`. Los archivos _raw
 son append-only (nuevas transacciones/señales, nunca se actualizan).
+
+Cuando tu Silver procesa ese archivo con APPLY CHANGES INTO, lee la columna Op y decide:
+  - I → inserta la fila nueva                               
+  - U → actualiza la existente
+  - D → borra la fila (o la marca como inactiva)
 
 Vamos a construir un medallón: bronze → silver → gold, usando Lakeflow
 Declarative Pipelines. Todo bajo el catálogo `digit_payments`, en esquemas
@@ -87,10 +83,8 @@ STREAMING
 Respeta estas reglas sin que te las repita en cada prompt.
 ```
 
-**Efecto durante la demo:** cuando los devs vean que el Prompt 2, 3, 4 y
-5 generan tablas con el mismo naming, tags y clustering sin que se lo
-pidas cada vez — ese es el momento donde entienden que el agente aprende
-el estándar del equipo, no solo genera código genérico.
+**Efecto:** cuando los devs vean que el Prompt 2, 3, 4 y
+Genie code aprende el estándar del equipo, no solo genera código genérico.
 
 ---
 
@@ -137,6 +131,7 @@ Autoloader configurado.
 ```
 En el mismo pipeline, agrega el esquema silver con las 3 dimensiones como
 SCD Type 2 usando APPLY CHANGES INTO:
+
 
 1. silver.merchants
    - Fuente: bronze.merchants_cdc_raw
