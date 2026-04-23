@@ -65,6 +65,17 @@ DMS.
 > Metric Views, Genie Space y row filters — en una hora, sin escribir
 > una sola línea de código a mano."*
 
+**Contextualización a SU arquitectura** (di esto justo después para que vean
+que viene pensada para su entorno):
+
+> *"Esta demo vive en el equivalente a su Workspace Dev. Lo que construyamos
+> sigue pasando por su flujo normal: PR a Main con revisión manual, empaquetado
+> con su Asset Bundle, deploy a Prod con su service principal. El Genie Space
+> al final lo publicamos al equivalente de su Workspace Sandbox, donde hoy
+> Andrea y Enrique consumen via Databricks One y Discover-Domains.*
+>
+> *Genie Code no reemplaza su gobierno de DevOps — lo acelera."*
+
 **Muestra el diagrama de arquitectura** (`docs/arquitectura.md`). Señala:
 - La zona landing (≈ su S3 con DMS)
 - Bronze como ingesta sin magia

@@ -93,6 +93,42 @@
 
 Total raw: ~5.6M registros. Generación local: <5 min en cluster Serverless.
 
+## Cómo encaja esto en su arquitectura (3 workspaces + DAB)
+
+El cliente opera con 3 workspaces y deploy vía Databricks Asset Bundles:
+
+```
+┌─ Dev/Pre-prod account ────────┐    ┌─ Production account ─────────────────┐
+│                               │    │                                      │
+│  Workspace Dev                │    │  Workspace Prod                      │
+│  • devs codean                │PR→ │  • jobs continuos + batch            │
+│  • DAB empaqueta              │    │  • service principal ejecuta         │
+│  • push a ft/ branch          │    │                                      │
+│                               │    │  Workspace Sandbox                   │
+│  [ESTA DEMO VIVE ACÁ]         │    │  • negocio consume                   │
+│                               │    │  • Databricks One + Discover-Domains │
+└───────────────────────────────┘    │  • Genie Spaces se publican acá      │
+                                     └──────────────────────────────────────┘
+```
+
+**Mapeo de la demo a su flujo real:**
+
+1. **Durante el workshop**, todo el pipeline (bronze → silver → gold) se
+   construye en **Workspace Dev** usando Genie Code.
+2. **Metric Views** quedan en Unity Catalog (compartido entre workspaces).
+3. **El Genie Space** del Prompt 5 se publica en **Workspace Sandbox** para
+   que Andrea, Enrique y el equipo de negocio lo consuman vía Databricks One.
+4. **DAB** empaqueta el pipeline para promoción Dev → Prod. Genie Code
+   puede generar el `databricks.yml` y el bundle config (ver apéndice de
+   prompts de bolsillo).
+5. **PR manual Dev → Main** sigue siendo el gate humano — Genie Code
+   genera el código, pero la revisión del equipo antes de Prod no
+   desaparece. Es una característica, no un bug.
+
+**Lo que NO toca la demo:**
+- Hive metastore legacy (en migración a UC — no es parte de este workshop)
+- Service principal de prod (Genie Code genera el código, no lo deploya)
+
 ## Decisiones de diseño
 
 ### Por qué SCD Type 2 y no SCD 1
