@@ -6,26 +6,29 @@
 # MAGIC
 # MAGIC **Importante:** solo crea `raw` como esquema + el volumen.
 # MAGIC Los esquemas `bronze`, `silver`, `gold` los crea Genie Code en vivo.
+# MAGIC
+# MAGIC ## ⚠️ Antes de correr
+# MAGIC Revisá `../config` y ajustá `CATALOG`, `RAW_SCHEMA`, `VOLUME_NAME` si
+# MAGIC no querés usar los defaults (`digit_payments.raw.landing`).
 
 # COMMAND ----------
 
-CATALOG = "digit_payments"
-VOLUME_NAME = "landing"
+# MAGIC %run ../config
 
 # COMMAND ----------
 
 spark.sql(f"CREATE CATALOG IF NOT EXISTS {CATALOG}")
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.raw")
-spark.sql(f"CREATE VOLUME IF NOT EXISTS {CATALOG}.raw.{VOLUME_NAME}")
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{RAW_SCHEMA}")
+spark.sql(f"CREATE VOLUME IF NOT EXISTS {CATALOG}.{RAW_SCHEMA}.{VOLUME_NAME}")
 
-print(f"Catálogo y volumen listos en /Volumes/{CATALOG}/raw/{VOLUME_NAME}/")
+print(f"Catálogo y volumen listos en {LANDING_ROOT}/")
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## Estructura esperada del volumen
 # MAGIC ```
-# MAGIC /Volumes/digit_payments/raw/landing/
+# MAGIC {LANDING_ROOT}/
 # MAGIC     merchants_cdc/
 # MAGIC     bins_cdc/
 # MAGIC     customers_cdc/

@@ -10,11 +10,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../config
+
+# COMMAND ----------
+
 from pyspark.sql import functions as F
 from datetime import datetime, timedelta
 
-CATALOG = "digit_payments"
-LANDING = f"/Volumes/{CATALOG}/raw/landing/fraud_signals_raw"
+LANDING = f"{LANDING_ROOT}/fraud_signals_raw"
 
 SIGNAL_TYPES = [
     "VELOCITY_HIGH",
@@ -37,7 +40,7 @@ base_date = datetime(2026, 3, 24)
 
 for batch_idx in range(10):
     batch_start = base_date + timedelta(days=batch_idx * 3)
-    txn_path = f"/Volumes/{CATALOG}/raw/landing/transactions_raw/batch_{batch_start.strftime('%Y%m%d')}.parquet"
+    txn_path = f"{LANDING_ROOT}/transactions_raw/batch_{batch_start.strftime('%Y%m%d')}.parquet"
 
     txns = spark.read.parquet(txn_path)
 

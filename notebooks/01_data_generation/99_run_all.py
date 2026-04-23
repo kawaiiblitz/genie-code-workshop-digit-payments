@@ -42,10 +42,11 @@ print(f"{'='*60}")
 
 # COMMAND ----------
 
-CATALOG = "digit_payments"
-landing_root = f"/Volumes/{CATALOG}/raw/landing"
+# MAGIC %run ../config
+
+# COMMAND ----------
 
 for entity in ["merchants_cdc", "bins_cdc", "customers_cdc", "transactions_raw", "fraud_signals_raw"]:
-    files = dbutils.fs.ls(f"{landing_root}/{entity}")
+    files = dbutils.fs.ls(f"{LANDING_ROOT}/{entity}")
     n_files = len([f for f in files if not f.name.startswith("_")])
     print(f"  {entity}: {n_files} archivos")

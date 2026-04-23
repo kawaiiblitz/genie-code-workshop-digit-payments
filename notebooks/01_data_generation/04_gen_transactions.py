@@ -16,11 +16,14 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../config
+
+# COMMAND ----------
+
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
-CATALOG = "digit_payments"
-LANDING = f"/Volumes/{CATALOG}/raw/landing/transactions_raw"
+LANDING = f"{LANDING_ROOT}/transactions_raw"
 N_TRANSACTIONS = 5_000_000
 N_BATCHES = 10
 
@@ -34,12 +37,12 @@ N_BATCHES = 10
 # COMMAND ----------
 
 merchants = (
-    spark.read.parquet(f"/Volumes/{CATALOG}/raw/landing/merchants_cdc/initial_load_20260323.parquet")
+    spark.read.parquet(f"{LANDING_ROOT}/merchants_cdc/initial_load_20260323.parquet")
     .select("merchant_id", "country", "risk_tier", "mcc_code")
     .cache()
 )
 bins = (
-    spark.read.parquet(f"/Volumes/{CATALOG}/raw/landing/bins_cdc/initial_load_20260323.parquet")
+    spark.read.parquet(f"{LANDING_ROOT}/bins_cdc/initial_load_20260323.parquet")
     .select("bin", "risk_flag", "card_brand", "card_type", "country")
     .cache()
 )

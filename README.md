@@ -62,15 +62,18 @@ Metric Views + Genie Space + Row Filter por país
 
 ---
 
-## Agenda (1 hora — demo guiada)
+## Agenda (1 hora — demo guiada + 2 momentos hands-on)
 
-| Tiempo | Módulo | Qué ve la audiencia |
+| Tiempo | Módulo | Qué ve / hace la audiencia |
 |---|---|---|
 | 0:00–0:05 | Contexto y arquitectura | Diagrama del antes/después. El dolor real. |
-| 0:05–0:30 | **Silver con Genie Code** (núcleo) | Bronze + Silver con `APPLY CHANGES` + calidad. SCD2 sobre CDC. |
-| 0:30–0:45 | Gold para fraude | Agregado incremental que reemplaza window functions. |
-| 0:45–0:55 | Metric View + Genie Space + seguridad | Capa semántica, NL queries, row filter por país. |
-| 0:55–1:00 | Cierre y recursos | Repo, próximos pasos. |
+| 0:05–0:20 | **Silver con Genie Code** (Prompts 1 + 2) | Bronze + Silver con `APPLY CHANGES`. SCD2 sobre CDC. |
+| **0:20–0:27** | **★ Hands-on #1** | La audiencia le pide a Genie Code que convierta UNO de sus MERGEs manuales actuales a `APPLY CHANGES`, en su propio workspace. |
+| 0:27–0:41 | Silver hechos + Gold (Prompts 3 + 4) | Streaming enriquecido + agregado incremental que reemplaza window functions. |
+| 0:41–0:48 | Metric View + Genie Space (Prompt 5) | Capa semántica + NL queries. |
+| **0:48–0:54** | **★ Hands-on #2** | La audiencia abre su propio Genie Space y le hace una pregunta de su negocio real. |
+| 0:54–0:57 | Gobierno (Prompt 6) | Row filter + column masking por país. |
+| 0:57–1:00 | Cierre y recursos | Repo, próximos pasos. |
 
 ---
 
@@ -111,15 +114,30 @@ Genie Code durante la demo** — por diseño.
 ### Prerrequisitos
 
 - Workspace Databricks con Unity Catalog y Genie habilitado
-- Databricks CLI autenticado (`databricks auth login` — ya configurado en
-  `fe-vm-serverless-stable-rtpa`)
+- Databricks CLI autenticado (`databricks auth login`)
 - Python 3.10+
+- Permisos para crear catálogo + volumen UC en el workspace
+
+### ★ Paso 0 — Ajustar catálogo y esquema *(todos lo hacen primero)*
+
+**Antes de correr cualquier cosa**, abrí `notebooks/config.py` y revisá:
+
+```python
+CATALOG = "digit_payments"    # ← cambiá si ya tenés un catálogo sandbox propio
+RAW_SCHEMA = "raw"
+VOLUME_NAME = "landing"
+```
+
+Por default crea el catálogo `digit_payments` (si no existe) con el esquema
+`raw` y el volumen `landing`. Si en tu workspace no podés crear catálogos, o
+preferís reutilizar uno existente, cambia estas 3 variables. El resto de los
+notebooks lo levantan automáticamente vía `%run ../config`.
 
 ### Paso 1 — Preparar el scaffold en el workspace
 
-1. Subir la carpeta `notebooks/` al workspace (vía Databricks CLI o UI)
-2. Correr `00_setup/00_setup.py` (crea catálogo + esquemas + volumen UC para landing)
-3. Correr `01_data_generation/99_run_all.py` (genera ~5M registros de raw)
+1. Subir la carpeta `notebooks/` al workspace (vía `databricks workspace import-dir` o la UI)
+2. Correr `00_setup/00_setup` (crea catálogo + esquema + volumen — ~10s)
+3. Correr `01_data_generation/99_run_all` (genera ~5.6M registros de raw — ~3-5 min)
 
 ### Paso 2 — Ejecutar el workshop
 
@@ -129,6 +147,8 @@ Abrir Genie Code en el workspace y seguir
 ### Paso 3 — Guion para quien presenta
 
 Revisar [`docs/workshop_guion.md`](docs/workshop_guion.md) antes de arrancar.
+Contiene el minuto a minuto + los **2 momentos hands-on** donde la audiencia
+prueba Genie Code sobre sus propios datos reales.
 
 ---
 

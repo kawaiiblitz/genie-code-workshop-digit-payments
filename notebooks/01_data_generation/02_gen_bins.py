@@ -10,14 +10,17 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../config
+
+# COMMAND ----------
+
 import random
 from datetime import datetime, timedelta
 from pyspark.sql import Row
 
 random.seed(43)
 
-CATALOG = "digit_payments"
-LANDING = f"/Volumes/{CATALOG}/raw/landing/bins_cdc"
+LANDING = f"{LANDING_ROOT}/bins_cdc"
 N_BINS = 1_000
 
 # COMMAND ----------

@@ -17,10 +17,20 @@ DMS.
 
 ## Antes del workshop (checklist)
 
-- [ ] El día anterior: correr `99_run_all.py` en el workspace. Verificar
-      que los 5 folders del landing tengan archivos.
+- [ ] **Paso 0 de `config.py`:** verificá que `CATALOG = "digit_payments"`
+      (o el que vayas a usar) esté correcto **antes de correr el scaffold**.
+- [ ] El día anterior: correr `00_setup` y luego `99_run_all` en el
+      workspace. Verificar que los 5 folders del landing tengan archivos.
 - [ ] Abrir Genie Code y **probar el Prompt 1 y 2** en una sesión
       desechable. Si algo falla, debuggealo antes de la demo.
+- [ ] **Avisá al cliente que lleguen con Genie Code abierto** en su
+      workspace dev y una tabla CDC a la mano para el Hands-on #1.
+      Sugerencia de email 24h antes:
+      > *"Mañana vamos a tener 2 momentos donde ustedes van a usar Genie
+      > Code con sus propios datos. Para aprovecharlo al máximo, lleguen
+      > con: (1) Genie Code abierto en su workspace dev, (2) un MERGE que
+      > hayan escrito a mano esta semana sobre algún CDC, y (3) una
+      > pregunta de negocio que quieran probar en Genie."*
 - [ ] Tener un browser con 3 tabs abiertas:
   1. Genie Code
   2. El Unity Catalog Explorer del catálogo `digit_payments`
@@ -29,6 +39,9 @@ DMS.
 - [ ] **Plan B:** si Genie Code tarda mucho o falla en vivo, el repo tiene
       los notebooks de referencia — *pero evita caer ahí*, el valor de la
       demo es verlo escribirse solo.
+- [ ] **Plan B para los hands-on:** si nadie del equipo trajo un MERGE real,
+      tené un ejemplo sintético guardado que les puedas mostrar y pedirles
+      que lo adapten mentalmente a su caso.
 
 ---
 
@@ -64,6 +77,17 @@ tuerce el brazo."* Deja que respondan — ahí ya enganchaste.
 
 ---
 
+---
+
+> **Formato del workshop:** demo guiada + 2 momentos hands-on.
+> **Vos** corrés los Prompts 1-6 en tu pantalla. La audiencia **te sigue con
+> la vista**, y en dos momentos específicos (0:20 y 0:48) pausás para que
+> **ellos le pidan algo a Genie Code en su propio workspace, sobre sus
+> datos reales**. Esto cumple la política STS (ellos al teclado) y les da
+> el "aha moment" con data propia.
+
+---
+
 ## 0:05 – 0:08 — Prompt 1 (Bronze)
 
 **Qué vas a decir mientras Genie Code trabaja:**
@@ -88,7 +112,7 @@ señala solo estas 2-3 cosas:
 
 ---
 
-## 0:08 – 0:22 — Prompt 2 (Silver SCD2) — **★ ESTRELLA ★**
+## 0:08 – 0:20 — Prompt 2 (Silver SCD2) — **★ ESTRELLA ★**
 
 > *"Este es el prompt que vale el workshop. Voy a pedirle Silver con SCD
 > Type 2 sobre los tres CDCs — merchants, bins, customers. Esto es lo que
@@ -126,11 +150,53 @@ con lógica de versionado. Y lo que acaban de ver es que Genie Code ya
 sabe el dialecto de Lakeflow Declarative Pipelines; no tienen que
 aprenderlo."*
 
-**Pausa para preguntas** (2 min). Esto es donde van a preguntar cosas.
+**Pausa breve para preguntas** (1 min). Si hay muchas dudas, diles que las
+retomás al final — el momento hands-on viene YA.
 
 ---
 
-## 0:22 – 0:30 — Prompt 3 (Silver hechos con streaming enriquecido)
+## 0:20 – 0:27 — ★ HANDS-ON #1 — "Convertí tu MERGE manual"
+
+> **Este es el primer punto donde el teclado pasa a ellos.** Vos sólo guías.
+
+**Qué les decís (literal):**
+
+> *"Paren. Ahora van ustedes. Cada uno abra Genie Code en su workspace dev.
+> Tomen UNO de los MERGEs que hayan escrito a mano esta semana contra sus
+> CDCs — no importa cuál, el más chiquito que tengan — y pídanle a Genie
+> Code que lo reescriba como `APPLY CHANGES INTO` en un Lakeflow Declarative
+> Pipeline. Les doy 5 minutos. Luego me cuentan qué les generó."*
+
+**Prompt sugerido para que les dictés** (si alguien no sabe cómo empezar):
+
+```
+Tengo esta tabla CDC que viene de AWS DMS con columnas Op (I/U/D) y ts:
+[que ellos peguen el schema o el DDL de su tabla real]
+
+Y este MERGE que escribí a mano:
+[que peguen su MERGE]
+
+Convertilo a APPLY CHANGES INTO sobre un Lakeflow Declarative Pipeline,
+guardándolo como SCD Type 2 si la tabla lo amerita. Agregá expectations
+básicas y comments.
+```
+
+**Tu rol durante estos 7 min:**
+- Mirá que nadie quede trabado. Si ves a alguien sin escribir, acercate virtualmente
+- NO escribas vos. Si sugieren, suger en voz alta: *"probá agregarle X al prompt"*
+- Si a Víctor le salió algo raro, hacelo hablar: *"Víctor, ¿qué generó? Compartí pantalla 30 seg"*
+
+**Los últimos 2 minutos del módulo:** dejá que 1-2 compartan qué obtuvieron.
+Esto genera conversación orgánica y marca el tono de "sí, funciona con
+nuestros datos".
+
+**Si nadie quiere compartir:** no fuerces. Decí *"OK, seguimos — cuando
+quieran me cuentan qué les salió"* y arrancá el Prompt 3. Van a estar
+pensando en lo suyo mientras vos hablás.
+
+---
+
+## 0:27 – 0:34 — Prompt 3 (Silver hechos con streaming enriquecido)
 
 > *"Ahora las transacciones. Append-only, streaming, enriquecidas con
 > merchants y BINs vigentes. Y agrego tags de UC porque Víctor mencionó
@@ -151,7 +217,7 @@ si lo escribieran a mano tendrían que acordarse de filtrar por
 
 ---
 
-## 0:30 – 0:38 — Prompt 4 (Gold — el ataque directo al pain)
+## 0:34 – 0:41 — Prompt 4 (Gold — el ataque directo al pain)
 
 > *"Ahora sí, ataquemos el pain de los 15-20 minutos. ¿Qué tan caros son
 > sus window functions sobre Silver? Vamos a reemplazarlos con un
@@ -178,7 +244,7 @@ Tiempo de respuesta: <1s. **Contraste verbal:**
 
 ---
 
-## 0:38 – 0:52 — Prompt 5 (Metric View + Genie Space)
+## 0:41 – 0:48 — Prompt 5 (Metric View + Genie Space)
 
 > *"Lo que sigue es la capa semántica — esto ya se los había mencionado
 > el 26 de febrero, Metric Views. Hoy lo vamos a crear, y encima le
@@ -202,7 +268,41 @@ algo específico de OpenPay, mejor — más real.
 
 ---
 
-## 0:52 – 0:56 — Prompt 6 (Row filter + column mask)
+## 0:48 – 0:54 — ★ HANDS-ON #2 — "Pregúntale algo real a Genie"
+
+> **Segundo momento donde ellos conducen.**
+
+**Qué les decís:**
+
+> *"Ahora ustedes. Abran Genie en su workspace — si ya tienen un Genie Space
+> configurado, perfecto; si no, pueden hacer la pregunta directo sobre una
+> tabla Silver suya. Háganle UNA pregunta de negocio real: algo que Enrique
+> o Andrea les pidió esta semana y todavía no respondieron. 5 minutos.
+> Después me cuentan si Genie lo resolvió, lo resolvió a medias, o falló."*
+
+**Prompt sugerido si no se les ocurre qué preguntar:**
+
+```
+[En su Genie Space o sobre su tabla Silver]:
+"¿Cuáles fueron los 10 comercios con más transacciones declinadas la semana
+pasada, agrupados por país?"
+```
+
+O algo del estilo de sus propios tableros de fraude.
+
+**Tu rol:**
+- Si alguien dice *"Genie no entendió"*, pregúntale qué palabras usó. Ayúdalo
+  a reformular SIN dictarle el prompt entero. *"Probá darle el nombre exacto
+  de la columna"* o *"decile qué period es 'semana pasada'"*
+- Si a alguien le sale perfecto, pedíle que lo comparta — ejemplo real > ejemplo tuyo
+
+**Objetivo del módulo:** que vean que Genie no es magia, es una herramienta
+con la que iteran. La primera pregunta quizás sale mediocre; la tercera ya
+sale bien. **Ese aprendizaje es el workshop.**
+
+---
+
+## 0:54 – 0:57 — Prompt 6 (Row filter + column mask)
 
 > *"El último prompt — gobierno. Víctor ya planteó en la sesión del 9
 > de abril que quieren segmentar por país para el training de Genie y
@@ -217,7 +317,7 @@ Pega el **Prompt 6**.
 
 ---
 
-## 0:56 – 1:00 — Cierre y siguientes pasos
+## 0:57 – 1:00 — Cierre y siguientes pasos
 
 **Cerrá con estos 3 puntos:**
 

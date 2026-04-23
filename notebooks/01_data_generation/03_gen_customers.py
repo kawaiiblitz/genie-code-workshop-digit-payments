@@ -7,6 +7,10 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../config
+
+# COMMAND ----------
+
 import random
 import hashlib
 from datetime import datetime, timedelta
@@ -15,8 +19,7 @@ from pyspark.sql import functions as F
 
 random.seed(44)
 
-CATALOG = "digit_payments"
-LANDING = f"/Volumes/{CATALOG}/raw/landing/customers_cdc"
+LANDING = f"{LANDING_ROOT}/customers_cdc"
 N_CUSTOMERS = 100_000
 
 # COMMAND ----------
