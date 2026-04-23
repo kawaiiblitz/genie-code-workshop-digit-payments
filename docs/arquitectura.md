@@ -97,28 +97,3 @@ forma de estructurar esto, Genie Code se adapta a sus convenciones.
 
 Total raw: ~5.6M registros. Generación local: <5 min en cluster Serverless.
 
-## Decisiones de la demo (no prescripciones arquitectónicas)
-
-### Por qué aparece SCD Type 2
-
-SCD Type 2 es útil cuando quieres reconstruir el estado histórico de una
-dimensión (ej: "cuando pasó esta transacción, ¿qué tier tenía este
-comercio?"). No es la única forma de manejar cambios — SCD1 (sobreescribir)
-es válido si no necesitas historia. La demo muestra SCD2 porque es un
-patrón que Genie Code escribe muy bien en pocas líneas; si un equipo
-prefiere SCD1, también lo genera.
-
-### Por qué aparece `APPLY CHANGES INTO`
-
-Es la sentencia declarativa de Lakeflow Declarative Pipelines para manejar
-SCD2 sin escribir MERGE a mano. Es poderosa como demo porque en ~8 líneas
-reemplaza lo que en MERGE toma 50. Pero si el equipo tiene MERGEs que
-funcionan, no hay razón de reemplazarlos mañana — Genie Code los escribe
-igual de rápido si se los pides.
-
-### Por qué aparece Metric Views + Genie Space
-
-Cerrar el ciclo end-to-end: desde el landing hasta una pregunta en
-lenguaje natural respondida por Genie. La capa semántica y el Genie
-Space son útiles si el equipo tiene analistas que preguntan mucho de lo
-mismo — pero no son obligatorios para usar el resto de lo que se mostró.
