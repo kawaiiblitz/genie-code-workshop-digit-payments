@@ -1,20 +1,6 @@
 # Workshop Genie Code — `digit_payments`
 
-Workshop guiado de **1 hora** sobre **Genie Code** en Databricks, diseñado para
-un equipo de ingeniería que hoy construye su capa Silver a mano desde archivos
-CDC (estilo AWS DMS) y consume directo de Silver para dashboards de fraude,
-lo que le pega al performance.
-
----
-
-## La historia que cuenta esta demo
-
-> *"Tienen DMS escribiendo CDC a S3 todos los días. El equipo está completando
-> Silver manualmente. Mientras tanto, los dashboards de fraude consumen directo
-> de transaccional y cargan en 15-20 minutos. Vamos a ver cómo Genie Code
-> cierra Silver con sus estándares, habilita una Gold ligera para fraude, y
-> pone todo detrás de una capa semántica con Genie Space — en una hora."*
-
+Workshop guiado * sobre **Genie Code** en Databricks.
 ---
 
 ## ¿Qué es Genie Code?
@@ -42,7 +28,7 @@ s3://landing/                         ◄── simulación de AWS DMS
 catalog.digit_payments.bronze         ◄── ingesta con expectations
          │
          ▼
-catalog.digit_payments.silver         ◄── ★ EL NÚCLEO DE LA DEMO
+catalog.digit_payments.silver        
     merchants       (SCD Type 2 con APPLY CHANGES)
     bins            (SCD Type 2)
     customers       (SCD Type 2)
@@ -60,20 +46,6 @@ Metric Views + Genie Space + Row Filter por país
 
 ---
 
-## Agenda (1 hora — demo guiada + 2 momentos hands-on)
-
-| Tiempo | Módulo | Qué ve / hace la audiencia |
-|---|---|---|
-| 0:00–0:05 | Contexto y arquitectura | Diagrama del antes/después. El dolor real. |
-| 0:05–0:20 | **Silver con Genie Code** (Prompts 1 + 2) | Bronze + Silver con `APPLY CHANGES`. SCD2 sobre CDC. |
-| **0:20–0:27** | **★ Hands-on #1** | La audiencia le pide a Genie Code que convierta UNO de sus MERGEs manuales actuales a `APPLY CHANGES`, en su propio workspace. |
-| 0:27–0:41 | Silver hechos + Gold (Prompts 3 + 4) | Streaming enriquecido + agregado incremental que reemplaza window functions. |
-| 0:41–0:48 | Metric View + Genie Space (Prompt 5) | Capa semántica + NL queries. |
-| **0:48–0:54** | **★ Hands-on #2** | La audiencia abre su propio Genie Space y le hace una pregunta de su negocio real. |
-| 0:54–0:57 | Gobierno (Prompt 6) | Row filter + column masking por país. |
-| 0:57–1:00 | Cierre y recursos | Repo, próximos pasos. |
-
----
 
 ## Estructura del repo
 
@@ -100,8 +72,8 @@ genie-code-workshop-digit-payments/
         └── 99_run_all.py              Orquestador
 ```
 
-**Todo lo que está en `bronze/`, `silver/` y `gold/` se construye en vivo con
-Genie Code durante la demo** — por diseño.
+**Todo lo que está en `bronze/`, `silver/` y `gold/` se construye con
+Genie Code durante la demo**.
 
 ---
 
@@ -141,12 +113,3 @@ Abre Genie Code en el workspace y sigue
 [`docs/genie_code_prompts.md`](docs/genie_code_prompts.md) en orden.
 
 ---
-
-## Por qué esta demo (y no otra)
-
-| Enfoque típico | Esta demo |
-|---|---|
-| Tablas raw estáticas | **CDC incremental estilo AWS DMS** (refleja el flujo real de DMS) |
-| "Ver todas las features de Genie Code" | **Resolver un dolor específico**: cerrar Silver |
-| Hands-on que se cae si el wifi falla | **Demo guiada**: el presentador controla el ritmo |
-| Silver aspiracional, Gold como estrella | **Silver es el protagonista**, Gold es el cierre |
