@@ -1,6 +1,6 @@
 # Workshop Genie Code — `digit_payments`
 
-Workshop guiado * sobre **Genie Code** en Databricks.
+Workshop guiado sobre **Genie Code** en Databricks.
 ---
 
 ## ¿Qué es Genie Code?
