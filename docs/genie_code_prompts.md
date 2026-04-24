@@ -122,23 +122,21 @@ Autoloader configurado.
 
 ---
 
-## Prompt 2 — Silver dimensiones: SCD Type 2 con `APPLY CHANGES`
+## Prompt 2 — Silver dimensiones con `APPLY CHANGES INTO`
 
 > **Este es el momento estrella del workshop.** Aquí es donde el equipo
-> ve que Genie Code resuelve en 2 minutos lo que a ellos les toma semanas
+> ve que Genie Code resuelve en 2 minutos lo que a ellos les toma tiempo
 > escribiendo MERGEs a mano.
 
 ```
-En el mismo pipeline, agrega el esquema silver con las 3 dimensiones como
-SCD Type 2 usando APPLY CHANGES INTO:
+En el mismo pipeline, agrega el esquema silver con las 3 dimensiones
+usando APPLY CHANGES INTO:
 
 
 1. silver.merchants
    - Fuente: bronze.merchants_cdc_raw
    - Claves: merchant_id
    - Secuencia: ts
-   - Columnas a trackear (SCD2): risk_tier, monthly_volume_estimate, status
-   - Ignora el resto para SCD2 (solo actualiza in-place)
    - APPLY AS DELETE WHEN Op = 'D'
    - Exceptúa las columnas Op y ts del target
 
@@ -146,29 +144,24 @@ SCD Type 2 usando APPLY CHANGES INTO:
    - Fuente: bronze.bins_cdc_raw
    - Claves: bin
    - Secuencia: ts
-   - Trackea risk_flag como SCD2 (es lo único importante históricamente)
    - APPLY AS DELETE WHEN Op = 'D'
 
 3. silver.customers
    - Fuente: bronze.customers_cdc_raw
    - Claves: customer_id
    - Secuencia: ts
-   - Trackea tier, country como SCD2
    - APPLY AS DELETE WHEN Op = 'D'
 
 Agrega expectations:
 - silver.merchants: risk_tier IN ('A','B','C')
 - silver.bins: risk_flag IN ('LOW','MEDIUM','HIGH')
 
-Agrega COMMENTs explicando para qué sirve cada tabla y que el tracking
-histórico es crítico para auditoría de fraude (poder responder "cuando
-ocurrió esta transacción, ¿este merchant estaba en qué tier?").
+Agrega COMMENTs descriptivos en cada tabla.
 ```
 
-**Punto de pausa en la demo:** cuando Genie Code termine, muestra el código
-generado y señala literalmente la línea de `APPLY CHANGES INTO ... STORED AS
-SCD TYPE 2`. Esa línea *reemplaza* ~50 líneas de MERGE manual con lógica de
-válido-desde / válido-hasta.
+**Punto de pausa en la demo:** cuando Genie Code termine, señala la
+llamada `apply_changes()`. Esa sentencia declarativa reemplaza las
+decenas de líneas de MERGE que tomaría escribir lo equivalente a mano.
 
 ---
 
@@ -179,8 +172,8 @@ Agrega al pipeline dos tablas silver más:
 
 4. silver.transactions
    - Fuente streaming: bronze.transactions_raw
-   - Join (con streaming-static join contra silver.merchants vigentes y
-     silver.bins vigentes — es decir, con __END_AT IS NULL)
+   - Streaming-static join contra silver.merchants y silver.bins (las
+     versiones vigentes que APPLY CHANGES mantiene actualizadas)
    - Enriquece con: merchant_country, merchant_risk_tier, merchant_mcc,
      bin_issuer_bank, bin_card_brand, bin_card_type, bin_risk_flag
    - Genera una columna derivada transaction_hour = hour(transaction_ts)
