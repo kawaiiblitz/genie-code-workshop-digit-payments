@@ -49,7 +49,7 @@ Declarative Pipelines. Todo bajo el catálogo `digit_payments`, en esquemas
 ## Prompt maestro de estándares (opcional, recomendado)
 
 Inmediatamente después del contexto, pega este prompt. Son las "reglas del
-juego" que Genie Code va a respetar durante **toda** la sesión — así no
+juego" que Genie Code va a respetar durante **toda** la sesión, así no
 tienes que repetir los estándares en cada prompt.
 
 ```
@@ -82,9 +82,6 @@ STREAMING
 
 Respeta estas reglas sin que te las repita en cada prompt.
 ```
-
-**Efecto:** cuando los devs vean que el Prompt 2, 3, 4 y
-Genie code aprende el estándar del equipo, no solo genera código genérico.
 
 ---
 
@@ -122,16 +119,11 @@ Autoloader configurado.
 
 ---
 
-## Prompt 2 — Silver dimensiones con `APPLY CHANGES INTO`
-
-> **Este es el momento estrella del workshop.** Aquí es donde el equipo
-> ve que Genie Code resuelve en 2 minutos lo que a ellos les toma tiempo
-> escribiendo MERGEs a mano.
+## Prompt 2 — Silver dimensiones
 
 ```
 En el mismo pipeline, agrega el esquema silver con las 3 dimensiones
 usando APPLY CHANGES INTO:
-
 
 1. silver.merchants
    - Fuente: bronze.merchants_cdc_raw
@@ -159,9 +151,6 @@ Agrega expectations:
 Agrega COMMENTs descriptivos en cada tabla.
 ```
 
-**Punto de pausa en la demo:** cuando Genie Code termine, señala la
-llamada `apply_changes()`. Esa sentencia declarativa reemplaza las
-decenas de líneas de MERGE que tomaría escribir lo equivalente a mano.
 
 ---
 
@@ -199,7 +188,7 @@ Agrega tags de Unity Catalog a las tablas silver:
 Agrega COMMENT a cada columna importante de silver.transactions.
 ```
 
-**Punto de pausa:** muestra que Genie Code agregó:
+**Genie Code** agregó:
 - El streaming-static join (patrón no trivial)
 - Las tags de UC (consistencia de nomenclatura)
 - Comments a nivel columna (sin que lo pidieras explícitamente — Genie Code
@@ -208,9 +197,6 @@ Agrega COMMENT a cada columna importante de silver.transactions.
 ---
 
 ## Prompt 4 — Gold: reemplazar window functions por agregados incrementales
-
-> **Este prompt ataca el pain principal: window functions sobre Silver
-> que revientan el performance.**
 
 ```
 Crea el esquema gold y dos tablas materialized view en el pipeline:
@@ -236,16 +222,6 @@ Crea el esquema gold y dos tablas materialized view en el pipeline:
      signal_count_total (join con silver.fraud_signals)
    - Incluir bin_issuer_bank, bin_card_brand, bin_risk_flag vigente
 
-Comentá en un bloque markdown (dlt.markdown si existe, o como COMMENT en SQL)
-POR QUÉ estas Gold existen: reemplazan queries con WINDOW FUNCTION sobre
-Silver que tomaban 15-20 minutos. Ahora el cálculo es incremental y los
-dashboards consultan Gold directamente.
-```
-
-**Punto de pausa crítico:** abre un notebook lateral rápido y corre un
-`SELECT * FROM gold.merchant_daily_risk ORDER BY fraud_rate DESC LIMIT 20`.
-Tiempo de respuesta: sub-segundo. Compara verbalmente contra una query
-equivalente con window function sobre Silver.
 
 ---
 
@@ -307,33 +283,9 @@ Agrega también column masking sobre silver.transactions.device_fingerprint:
 - El resto ve una versión hasheada (sha2 de 8 chars)
 ```
 
-**Cierre de la demo:** señala que este gobierno se escribió en ~30 segundos
-con Genie Code, vs. horas de documentación y testing manual. Y que todo
-queda en el pipeline declarativo — reproducible, versionable en Git,
-idéntico en dev y prod.
-
 ---
 
-## Apéndice: prompts de "bolsillo" para Q&A
-
-Si alguien de la audiencia pregunta algo específico, ten listos estos
-prompts cortos para demostrar que Genie Code resuelve ad hoc:
-
-**"¿Cómo agregaría alertas si la fraud_rate supera 2%?"**
-```
-Agrega un job de Databricks que corra diariamente una query contra
-gold.merchant_daily_risk buscando merchants con fraud_rate > 0.02 en el
-último día, y envíe un email al equipo de fraude con los resultados.
-```
-
-**"¿Puede hacer lo mismo pero streaming/real-time?"**
-```
-Modifica gold.merchant_daily_risk a una ventana de 1 hora en streaming
-sobre silver.transactions (watermark 10 min), y crea una alerta que
-dispare cuando fraud_rate horaria > 5%.
-```
-
-**"¿Cómo entrenamos un modelo de fraude sobre esto?"**
+## Prompt 6 — ML :Cómo entrenamos un modelo de fraude sobre esto?"**
 ```
 Sobre silver.transactions, genera un notebook que:
 - Cree features: transaction_hour, is_night, amount_vs_merchant_avg,
