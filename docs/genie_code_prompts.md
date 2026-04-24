@@ -1,7 +1,9 @@
 # Prompts de Genie Code — `digit_payments`
 
-Estos son los **6 prompts** para ejecutar en Genie Code durante la demo,
-en orden. Cada uno asume que el anterior ya se ejecutó.
+Estos son los **7 prompts** para ejecutar en Genie Code durante la demo,
+en orden. Cada uno asume que el anterior ya se ejecutó. Al final hay un
+apéndice de bolsillo con prompts extra para Q&A.
+
 ---
 
 ## Contexto para Genie Code
@@ -151,7 +153,6 @@ Agrega expectations:
 Agrega COMMENTs descriptivos en cada tabla.
 ```
 
-
 ---
 
 ## Prompt 3 — Silver hechos: streaming enriquecido
@@ -221,7 +222,7 @@ Crea el esquema gold y dos tablas materialized view en el pipeline:
    - Métricas: total_transactions, fraud_rate, avg_amount, unique_merchants,
      signal_count_total (join con silver.fraud_signals)
    - Incluir bin_issuer_bank, bin_card_brand, bin_risk_flag vigente
-
+```
 
 ---
 
@@ -285,7 +286,50 @@ Agrega también column masking sobre silver.transactions.device_fingerprint:
 
 ---
 
-## Prompt 6 — ML :Cómo entrenamos un modelo de fraude sobre esto?"**
+## Prompt 7 — Dashboard AI/BI sobre Gold
+
+```
+Genera un AI/BI dashboard en Databricks llamado "Prevención de Fraude —
+digit_payments" que consuma de gold.merchant_daily_risk y
+gold.bin_risk_profile. Incluye los siguientes widgets:
+
+1. KPIs arriba (tarjetas con número grande):
+   - Volumen total últimos 30 días
+   - Fraud rate últimos 30 días (formato %)
+   - Merchants activos últimos 30 días
+   - Ticket promedio últimos 30 días
+
+2. Gráfico de línea: fraud_rate diaria últimos 90 días, con drilldown por
+   merchant_country
+
+3. Tabla: top 20 merchants con mayor fraud_rate esta semana — columnas
+   merchant_id, merchant_country, merchant_risk_tier, total_transactions,
+   fraud_rate, total_amount_mxn
+
+4. Heatmap: fraud_rate por hora del día × día de la semana (para ver
+   patrones nocturnos / fin de semana)
+
+5. Gráfico de barras: top 10 BINs de riesgo HIGH con más fraude esta semana
+
+Filtros globales del dashboard:
+- Rango de fechas (default: últimos 30 días)
+- País (multi-select sobre merchant_country)
+- Risk tier del merchant (multi-select)
+
+Usa la metric view gold.merchant_kpis que creamos en el Prompt 5 cuando
+sea posible, para mantener consistencia de métricas.
+```
+
+**Cierre visual de la demo:** muestra el dashboard ya poblado con los
+datos. Es el remate natural — capa ejecutiva consumiendo el pipeline
+end-to-end que acaban de construir.
+
+---
+
+## Apéndice de bolsillo — Si sobra tiempo o sale en Q&A
+
+### ML: modelo de fraude con MLflow
+
 ```
 Sobre silver.transactions, genera un notebook que:
 - Cree features: transaction_hour, is_night, amount_vs_merchant_avg,
