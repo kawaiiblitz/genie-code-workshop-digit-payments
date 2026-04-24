@@ -286,43 +286,34 @@ Agrega también column masking sobre silver.transactions.device_fingerprint:
 
 ---
 
-## Prompt 7 — Dashboard AI/BI sobre Gold
+## Prompt 7 — Queries SQL para dashboard de fraude
 
 ```
-Genera un AI/BI dashboard en Databricks llamado "Prevención de Fraude —
-digit_payments" que consuma de gold.merchant_daily_risk y
-gold.bin_risk_profile. Incluye los siguientes widgets:
+Sobre gold.merchant_daily_risk y gold.bin_risk_profile, genera las 5
+queries SQL que alimentarían un dashboard de prevención de fraude:
 
-1. KPIs arriba (tarjetas con número grande):
-   - Volumen total últimos 30 días
-   - Fraud rate últimos 30 días (formato %)
-   - Merchants activos últimos 30 días
-   - Ticket promedio últimos 30 días
-
-2. Gráfico de línea: fraud_rate diaria últimos 90 días, con drilldown por
-   merchant_country
-
-3. Tabla: top 20 merchants con mayor fraud_rate esta semana — columnas
+1. KPI cards (volumen total, fraud rate, merchants activos, ticket
+   promedio — últimos 30 días)
+2. Serie de tiempo: fraud_rate diaria últimos 90 días por país
+3. Top 20 merchants con mayor fraud_rate esta semana (columnas:
    merchant_id, merchant_country, merchant_risk_tier, total_transactions,
-   fraud_rate, total_amount_mxn
+   fraud_rate, total_amount_mxn)
+4. Heatmap: fraud_rate por hora del día × día de la semana
+5. Top 10 BINs HIGH risk con más fraude esta semana (columnas: bin,
+   issuer_bank, card_brand, fraud_rate, total_transactions)
 
-4. Heatmap: fraud_rate por hora del día × día de la semana (para ver
-   patrones nocturnos / fin de semana)
+Usa la metric view gold.merchant_kpis cuando sea posible, para mantener
+consistencia de métricas con el Genie Space.
 
-5. Gráfico de barras: top 10 BINs de riesgo HIGH con más fraude esta semana
-
-Filtros globales del dashboard:
-- Rango de fechas (default: últimos 30 días)
-- País (multi-select sobre merchant_country)
-- Risk tier del merchant (multi-select)
-
-Usa la metric view gold.merchant_kpis que creamos en el Prompt 5 cuando
-sea posible, para mantener consistencia de métricas.
+Dame las queries listas para copiar/pegar como datasets en un dashboard
+Databricks AI/BI.
 ```
 
-**Cierre visual de la demo:** muestra el dashboard ya poblado con los
-datos. Es el remate natural — capa ejecutiva consumiendo el pipeline
-end-to-end que acaban de construir.
+**Cierre visual de la demo:** el dashboard se arma con estas queries en
+la UI (New → Dashboard → Add datasets → visualizar). Para evitar clicks
+en vivo, lo recomendable es tener el dashboard pre-creado antes del
+workshop y mostrarlo como cierre. Las queries son lo que Genie Code
+genera; los widgets son diseño visual que se hace con la UI.
 
 ---
 
