@@ -1,10 +1,20 @@
 # Prompts de Genie Code — `digit_payments`
 
-Estos son los **7 prompts** para ejecutar en Genie Code durante la demo,
-en orden. Cada uno asume que el anterior ya se ejecutó. Al final hay un
-apéndice de bolsillo con prompts extra para Q&A.
+Este repo cubre **3 sesiones** del workshop, cada una con sus prompts en
+orden. Cada prompt asume que el anterior ya se ejecutó:
+
+- **Sesión 1** (Prompts 1 a 6): construcción del medallón completo con
+  Genie Code, desde Bronze hasta Gold + Metric View + Genie Space + gobierno.
+- **Sesión 2** (Prompt 7): dashboard AI/BI de prevención de fraude con
+  marca OpenPay, apoyado en una Skill de Genie Code.
+- **Sesión 3** (Prompts 8 a 10): pipeline de ML para detección de fraude
+  con Feature Store, MLflow Experiments y UC Model Registry.
+
+Al final hay un apéndice de bolsillo con prompts extra para Q&A.
 
 ---
+
+# Sesión 1 — Construcción del medallón con Genie Code
 
 ## Contexto para Genie Code
 
@@ -285,6 +295,8 @@ Agrega también column masking sobre silver.transactions.device_fingerprint:
 ```
 
 ---
+
+# Sesión 2 — Dashboard AI/BI con marca OpenPay
 
 ## Setup de Skills (antes de las Sesiones 2 y 3)
 
