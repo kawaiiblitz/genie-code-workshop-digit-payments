@@ -400,26 +400,6 @@ dashboard y del Genie Space del Prompt 5 sigan compartiendo definición.
 
 # Sesión 3 — Pipeline de ML para detección de fraude
 
-Esta sesión asume que las Sesiones 1 y 2 ya pasaron (medallón completo
-en Gold, metric view, Genie Space, dashboard). Aquí construimos el
-pipeline de ML completo: Feature Engineering en Unity Catalog Feature
-Store, training de 3 modelos comparables con MLflow Experiments, y
-registro del Champion en UC Model Registry.
-
-**Pre-requisitos:**
-- Sesiones 1 y 2 completadas (Gold + dashboard).
-- Cluster all-purpose o serverless compute para notebooks (Python
-  requerido). Un SQL Warehouse no alcanza para `databricks-feature-engineering`.
-- Skill `estilo_visual_digit_payments` activa (opcional, aplica si los
-  notebooks generan plots).
-
-**Por qué importa esta sesión:** convierte los activos del medallón en
-un activo de ML gobernado. La Feature Table es reusable por otros
-equipos, el modelo se versiona en UC, todo el lineage se mantiene
-end-to-end desde el CDC de DMS hasta la inferencia.
-
----
-
 ## Prompt 8 — Feature Engineering con arquitectura medallón
 
 ```
@@ -468,31 +448,17 @@ Registra la Feature Table con COMMENT explicando que las features
 historicas son point-in-time correctas, y tags UC validos.
 ```
 
-**Conceptos clave que se enseñan con este prompt:**
+**Sobre el point-in-time join (en cristiano):**
 
-- **Feature Store como contrato**: la Feature Table es un activo
-  gobernado en UC, con primary key declarada, timestamp key, lineage
-  automático y permisos finos. Otros equipos la consumen con tres
-  líneas (`FeatureLookup`) sin reescribir la lógica.
+Cuando enriqueces cada transacción con la fraud_rate histórica de su
+merchant, el join debe usar el snapshot del **día anterior**, no el
+del mismo día. Si usas el mismo día, ese promedio ya incluye la
+transacción que estás tratando de clasificar. El modelo "ve la
+respuesta" antes de hacer la predicción y queda sesgado.
 
-- **Point-in-time joins (anti-leakage)**: el offset de un día contra
-  `merchant_daily_risk` y de una semana contra `bin_risk_profile` evita
-  que la fraud_rate del agregado incluya la transacción que el modelo
-  intenta predecir. Es la diferencia entre demo y producción.
-
-- **Silver vs Gold para features**: las transaccionales puras nacen en
-  Silver (granularidad transacción), las históricas vienen de Gold
-  pre-agregadas. No recalcular lo que el medallón ya entrega.
-
-**Errores comunes que vas a ver**:
-- *"Timeseries column 'transaction_ts' is not in primary_keys"*: añade
-  `transaction_ts` también a `primary_keys`. La PK compuesta es
-  requisito cuando hay timeseries column.
-- *"Tag value X is not allowed for tag policy key domain"*: tu
-  workspace tiene Tag Policy. Cambia el valor a uno permitido (ej.
-  `finance` en lugar de `fraud_detection`).
-- *"Cast DATE to BIGINT failed"*: usa `unix_date()` para convertir.
-  Genie suele auto-corregirlo.
+Por eso el prompt dice "as-of la fecha anterior". En código eso se
+traduce a `transaction_date - 1` para los joins diarios y a
+`week_start_date - 7` para los semanales.
 
 ---
 
@@ -525,27 +491,6 @@ Los 3 runs comparten experiment, dataset y split, asi son comparables
 en la UI del Experiment.
 ```
 
-**Conceptos clave que se enseñan con este prompt:**
-
-- **MLflow Experiment como Excel automatizado**: cada run captura
-  parámetros, métricas, código, environment y signature, sin que tú
-  hagas logging manual. Comparas runs en la UI ordenando por la
-  métrica que importa.
-
-- **Métrica correcta con clases desbalanceadas**: con fraud_rate ~1%,
-  un modelo que predice siempre "no fraude" tiene 99% accuracy y es
-  inútil. AUC-ROC también engaña con desbalance extremo. **AUC-PR**
-  (Area Under Precision-Recall Curve) es la métrica correcta.
-
-- **`class_weight='balanced'`**: penaliza más el error en la clase
-  minoritaria, evita que el modelo aprenda el truco de predecir
-  siempre la mayoritaria.
-
-- **3 modelos en escalera de complejidad**: empezar por Logistic
-  Regression (baseline simple) permite medir cuánto vale la
-  complejidad extra de Random Forest y XGBoost. Si baseline ya da
-  AUC-PR aceptable, no metas un boosted tree solo por meterlo.
-
 ---
 
 ## Prompt 10 — Registro del Champion en Unity Catalog
@@ -566,22 +511,6 @@ Los otros 2 modelos quedan en el experiment como referencia pero NO
 se registran. Si despues quieren probar uno como Challenger, le ponen
 ese alias en el siguiente registro.
 ```
-
-**Conceptos clave que se enseñan con este prompt:**
-
-- **Experiment vs Registry**: Experiments guardan TODO (incluyendo los
-  malos). Registry guarda SOLO lo que se va a usar. El paso de "curar"
-  los buenos es lo que separa MLOps maduro de "modelos en notebooks
-  sueltos".
-
-- **Patrón Champion-Challenger**: un alias `Champion` apunta a la
-  versión que sirve producción. Cuando entrenan un Challenger, lo
-  prueban en sombra. Si gana, swap de aliases sin downtime.
-
-- **Modelo como activo de UC**: igual que una tabla, el modelo tiene
-  permisos finos, lineage hacia las Feature Tables y datos de origen,
-  audit trail. Cuando auditoría pregunta de dónde viene el modelo, la
-  respuesta está en el lineage automático, no en un PowerPoint.
 
 ---
 
@@ -657,56 +586,49 @@ Feature Store hace `ALTER TABLE ADD COLUMN` automáticamente. Los
 consumidores que no piden la nueva columna en sus `FeatureLookup`
 simplemente la ignoran. **Operación segura.**
 
-### 5. Cambiar la definición de una feature existente · ⚠️ NO en sitio
-
-Si la fórmula de `merchant_fraud_rate_30d` cambia (por ejemplo, ahora
-excluye merchants nuevos), **NO sobrescribas la columna**. Crea una
-versión nueva:
-
-```python
-fe.create_table(
-    name="digit_payments.gold.transaction_features_v2",
-    primary_keys=["transaction_id", "transaction_ts"],
-    timestamp_keys=["transaction_ts"],
-    df=df_con_definicion_nueva,
-    description="V2 con merchant_fraud_rate_30d excluyendo merchants nuevos"
-)
-```
-
-Migra a los consumidores gradualmente. Cuando todos estén en `v2`,
-deprecan `v1`. Esta disciplina evita divergencias silenciosas entre
-equipos.
-
-### Regla mental para mantener compatibilidad
-
-| Operación | Seguridad | Cómo |
-|---|---|---|
-| Agregar filas nuevas | ✅ Segura | `fe.write_table` mode merge |
-| Agregar columna nueva | ✅ Segura | `fe.write_table` con DataFrame que la incluye |
-| Renombrar columna | ⚠️ Rompe | Crear `_v2`, migrar consumidores |
-| Cambiar tipo de columna | ⚠️ Rompe | Crear `_v2`, migrar consumidores |
-| Cambiar definición de feature existente | ⚠️ Rompe | Crear `_v2`, migrar consumidores |
-| Eliminar columna | ⚠️ Rompe | Avisar consumidores antes |
-
 ---
 
 ## Apéndice de bolsillo — Otros prompts si sobra tiempo
 
-### Streaming inference
+### Online Feature Store (latencia <50ms para servir en tiempo real)
 
-```
-Sobre el modelo digit_payments.gold.fraud_classifier@Champion, monta
-un Lakeflow Pipeline en streaming que score nuevas transacciones de
-silver.transactions en tiempo real, usando fe.score_batch internamente.
-Output: digit_payments.gold.transaction_scores con (transaction_id,
-fraud_score, scored_at).
-```
+Cuando el modelo de fraude se sirve detrás de un endpoint de tiempo
+real (cada autorización de tarjeta debe pasar por el modelo en
+milisegundos), no alcanza con tener la Feature Table en Delta. Hay
+que sincronizarla a una **Online Table**, que es como un mirror en
+memoria estilo Redis pensado para lookups por primary key con latencia
+muy baja.
 
-### Online Feature Store (latencia <50ms)
+El flujo es:
+
+1. La Feature Table offline (Delta en UC) se actualiza con jobs batch
+   o streaming, igual que cualquier tabla del medallón.
+2. Una Online Table se sincroniza desde la offline, opcionalmente en
+   modo continuo (`run_continuously=true`), así los cambios offline
+   se propagan en segundos.
+3. El Model Serving endpoint, al recibir una transacción nueva, hace
+   feature lookup contra la Online Table y devuelve la predicción
+   completa en menos de 50 ms.
 
 ```
 Sincroniza digit_payments.gold.transaction_features a una Online Table
-para servir features con latencia <50ms desde un Model Serving endpoint.
-Configura run_continuously=true para que las actualizaciones se
-propaguen automaticamente.
+llamada digit_payments.gold.transaction_features_online.
+
+- primary_key_columns: ["transaction_id"]
+- timeseries_key: "transaction_ts" (para que respete point-in-time
+  igual que la offline)
+- run_continuously: true, para que las nuevas transacciones procesadas
+  por el pipeline batch se propaguen al online store en segundos.
+
+Despues de creada, configura un Model Serving endpoint para
+digit_payments.gold.fraud_classifier@Champion que use esa Online Table
+como feature source automatico. La aplicacion solo necesita mandar
+transaction_id y transaction_ts al endpoint, y este resuelve el
+feature lookup y la prediccion en una sola llamada.
 ```
+
+**Por qué importa**: separa "entrenar con todo el histórico" (offline
+store, Delta) de "scorear en producción con baja latencia" (online
+store). Mismo contrato, dos medios. Sin esta separación, sus equipos
+de ML terminan inventando caches manuales con Redis o con tablas SQL,
+y rompen el lineage que UC les dio gratis.
